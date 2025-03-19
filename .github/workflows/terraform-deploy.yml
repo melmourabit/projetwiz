@@ -5,45 +5,36 @@ on:
     branches:
       - main  # Déclenchement sur push dans la branche main
  
+name: 'wiz-cli'
+on: [pull_request]
+ 
 jobs:
-  security_scan:
-    name: Wiz Security Scan
+  wiz-cli-iac-scan:
+    name: 'Wiz-cli IaC Scan'
     runs-on: ubuntu-latest
+    env:
+      SCAN_PATH: "." # Set the relative path in the repo to scan
+      POLICY: "Default IaC policy" # Set the desired Wiz CLI policy to use
+ 
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
  
     steps:
-      - name: Checkout du repo
-        uses: actions/checkout@v4
+    # Checkout the repository to the GitHub Actions runner
+    - name: Check out repository
+      uses: actions/checkout@v2
  
-      - name: Scanner les fichiers Terraform avec Wiz
-        uses: wiz-sec/github-action@v1
-        with:
-          api-token: ${{ secrets.WIZ_API_TOKEN }}
-          directory: "./"
+    - name: Download Wiz CLI
+      run: curl -o wizcli https://downloads.wiz.io/wizcli/latest/wizcli-linux-amd64 && chmod +x wizcli
  
-  terraform:
-    needs: security_scan  # Terraform ne s'exécute que si Wiz a fini
-    runs-on: ubuntu-latest
+    - name: Authenticate to Wiz
+      run: ./wizcli auth --id "$WIZ_CLIENT_ID" --secret "$WIZ_CLIENT_SECRET"
+      env:
+        WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+        WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
  
-    steps:
-      - name: Checkout du repo
-        uses: actions/checkout@v4
- 
-      - name: Installer Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.0
- 
-      - name: Connexion à Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
- 
-      - name: Initialiser Terraform
-        run: terraform init
- 
-      - name: Plan Terraform
-        run: terraform plan
- 
-      - name: Appliquer Terraform 
-        run: terraform apply -auto-approve
+    - name: Run wiz CLI IaC scan
+      run: ./wizcli iac scan --path $SCAN_PATH --policy "$POLICY"
  
