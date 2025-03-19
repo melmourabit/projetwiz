@@ -1,0 +1,49 @@
+name: Terraform Deploy to Azure with Wiz Scan
+ 
+on:
+  push:
+    branches:
+      - main  # Déclenchement sur push dans la branche main
+ 
+jobs:
+  security_scan:
+    name: Wiz Security Scan
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout du repo
+        uses: actions/checkout@v4
+ 
+      - name: Scanner les fichiers Terraform avec Wiz
+        uses: wiz-sec/github-action@v1
+        with:
+          api-token: ${{ secrets.WIZ_API_TOKEN }}
+          directory: "./"
+ 
+  terraform:
+    needs: security_scan  # Terraform ne s'exécute que si Wiz a fini
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout du repo
+        uses: actions/checkout@v4
+ 
+      - name: Installer Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+ 
+      - name: Connexion à Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+ 
+      - name: Initialiser Terraform
+        run: terraform init
+ 
+      - name: Plan Terraform
+        run: terraform plan
+ 
+      - name: Appliquer Terraform 
+        run: terraform apply -auto-approve
+ 
