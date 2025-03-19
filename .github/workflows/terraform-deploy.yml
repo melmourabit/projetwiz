@@ -34,4 +34,11 @@ jobs:
  
     - name: Run wiz CLI IaC scan
       run: ./wizcli iac scan --path $SCAN_PATH --policy "$POLICY"
+      
+    - name: Run wiz CLI IaC scan
+      run: ./wizcli iac scan --path $SCAN_PATH --policy "Default secrets policy"
+
+    - name: Run wiz CLI IaC scan
+      run: ./wizcli iac scan --path $SCAN_PATH --policy "Default sensitive data policy"
+ 
  
