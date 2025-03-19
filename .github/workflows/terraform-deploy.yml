@@ -5,9 +5,6 @@ on:
     branches:
       - main  # Déclenchement sur push dans la branche main
  
-name: 'Wiz Scan'
-on: [pull_request]
- 
 jobs:
   wiz-cli-iac-scan:
     name: 'Wiz-cli IaC Scan'
