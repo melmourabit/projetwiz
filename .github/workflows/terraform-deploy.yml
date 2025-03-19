@@ -1,4 +1,4 @@
-name: Terraform Deploy to Azure with Wiz Scan
+name: Terraform Deploy to Azure with Wiz
  
 on:
   push:
