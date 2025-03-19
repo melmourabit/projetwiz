@@ -5,7 +5,7 @@ on:
     branches:
       - main  # Déclenchement sur push dans la branche main
  
-name: 'wiz-cli'
+name: 'Wiz Scan'
 on: [pull_request]
  
 jobs:
